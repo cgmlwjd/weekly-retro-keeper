@@ -1,49 +1,89 @@
+
 import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Retrospective, RetrospectiveFormData } from '@/types/retrospective';
 import { calculateDayCount, calculateWeekNumber, getTodayString } from '@/utils/dateUtils';
 
 export function useRetrospectives() {
-  const [retrospectives, setRetrospectives] = useState<Retrospective[]>([]);
+  const queryClient = useQueryClient();
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem('retrospectives');
-    if (stored) {
-      try {
-        setRetrospectives(JSON.parse(stored));
-      } catch (error) {
-        console.error('Error parsing stored retrospectives:', error);
+  // Fetch retrospectives from Supabase
+  const { data: retrospectives = [], isLoading, error } = useQuery({
+    queryKey: ['retrospectives'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('retrospectives')
+        .select('*')
+        .order('date', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching retrospectives:', error);
+        throw error;
       }
-    }
-  }, []);
+      
+      return data || [];
+    },
+  });
 
-  // Save to localStorage whenever retrospectives change
-  useEffect(() => {
-    localStorage.setItem('retrospectives', JSON.stringify(retrospectives));
-  }, [retrospectives]);
+  // Add retrospective mutation
+  const addRetrospectiveMutation = useMutation({
+    mutationFn: async (formData: RetrospectiveFormData) => {
+      const today = getTodayString();
+      const newRetrospective = {
+        date: today,
+        week: calculateWeekNumber(today),
+        day_count: calculateDayCount(today),
+        author: formData.author,
+        summary: formData.summary,
+        keep: formData.keep,
+        problem: formData.problem,
+        try: formData.try,
+        memo: formData.memo || null,
+      };
+
+      const { data, error } = await supabase
+        .from('retrospectives')
+        .insert([newRetrospective])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error adding retrospective:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['retrospectives'] });
+    },
+  });
+
+  // Delete retrospective mutation
+  const deleteRetrospectiveMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('retrospectives')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting retrospective:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['retrospectives'] });
+    },
+  });
 
   const addRetrospective = (formData: RetrospectiveFormData) => {
-    const today = getTodayString();
-    const newRetrospective: Retrospective = {
-      id: Date.now().toString(),
-      date: today,
-      week: calculateWeekNumber(today),
-      day_count: calculateDayCount(today),
-      author: formData.author,
-      summary: formData.summary,
-      keep: formData.keep,
-      problem: formData.problem,
-      try: formData.try,
-      memo: formData.memo,
-      created_at: new Date().toISOString(),
-    };
-
-    setRetrospectives(prev => [newRetrospective, ...prev]);
-    return newRetrospective;
+    return addRetrospectiveMutation.mutateAsync(formData);
   };
 
   const deleteRetrospective = (id: string) => {
-    setRetrospectives(prev => prev.filter(retro => retro.id !== id));
+    deleteRetrospectiveMutation.mutate(id);
   };
 
   const getRetrospectivesByWeek = () => {
@@ -72,6 +112,8 @@ export function useRetrospectives() {
 
   return {
     retrospectives,
+    isLoading,
+    error,
     addRetrospective,
     deleteRetrospective,
     getRetrospectivesByWeek,

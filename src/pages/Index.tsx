@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,13 +9,13 @@ import { RetrospectiveForm } from '@/components/RetrospectiveForm';
 import { RetrospectiveCard } from '@/components/RetrospectiveCard';
 import { RetrospectiveFormData } from '@/types/retrospective';
 import { calculateDayCount, calculateWeekNumber, getTodayString } from '@/utils/dateUtils';
-import { Plus, Calendar, TrendingUp, Users, Clock } from 'lucide-react';
+import { Plus, Calendar, TrendingUp, Users, Clock, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { retrospectives, addRetrospective, deleteRetrospective, getRetrospectivesByWeek } = useRetrospectives();
+  const { retrospectives, isLoading, error, addRetrospective, deleteRetrospective, getRetrospectivesByWeek } = useRetrospectives();
   const [showForm, setShowForm] = useState(false);
 
   const today = getTodayString();
@@ -23,13 +24,21 @@ const Index = () => {
   const retrospectivesByWeek = getRetrospectivesByWeek();
   const weekNumbers = Object.keys(retrospectivesByWeek).map(Number).sort((a, b) => b - a);
 
-  const handleFormSubmit = (formData: RetrospectiveFormData) => {
-    const newRetrospective = addRetrospective(formData);
-    setShowForm(false);
-    toast({
-      title: "회고가 저장되었습니다! 🎉",
-      description: `Week ${newRetrospective.week} D+${newRetrospective.day_count}일차 회고가 성공적으로 저장되었습니다.`,
-    });
+  const handleFormSubmit = async (formData: RetrospectiveFormData) => {
+    try {
+      const newRetrospective = await addRetrospective(formData);
+      setShowForm(false);
+      toast({
+        title: "회고가 저장되었습니다! 🎉",
+        description: `Week ${newRetrospective.week} D+${newRetrospective.day_count}일차 회고가 성공적으로 저장되었습니다.`,
+      });
+    } catch (error) {
+      toast({
+        title: "오류가 발생했습니다",
+        description: "회고 저장 중 문제가 발생했습니다. 다시 시도해주세요.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleViewRetrospective = (id: string) => {
@@ -45,6 +54,21 @@ const Index = () => {
       });
     }
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="pt-6">
+            <p className="text-destructive mb-4">데이터를 불러오는 중 오류가 발생했습니다.</p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              다시 시도
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,7 +104,9 @@ const Index = () => {
                   <TrendingUp className="h-5 w-5" />
                   <span className="font-semibold">총 회고</span>
                 </div>
-                <div className="text-2xl font-bold">{retrospectives.length}개</div>
+                <div className="text-2xl font-bold">
+                  {isLoading ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : `${retrospectives.length}개`}
+                </div>
               </div>
             </div>
 
@@ -98,7 +124,12 @@ const Index = () => {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
-        {retrospectives.length === 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin mr-2" />
+            <span>회고 데이터를 불러오는 중...</span>
+          </div>
+        ) : retrospectives.length === 0 ? (
           <Card className="max-w-2xl mx-auto text-center shadow-soft">
             <CardContent className="pt-8 pb-8">
               <div className="text-6xl mb-4">📝</div>
