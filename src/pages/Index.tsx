@@ -1,12 +1,151 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useRetrospectives } from '@/hooks/useRetrospectives';
+import { RetrospectiveForm } from '@/components/RetrospectiveForm';
+import { RetrospectiveCard } from '@/components/RetrospectiveCard';
+import { RetrospectiveFormData } from '@/types/retrospective';
+import { calculateDayCount, calculateWeekNumber, getTodayString } from '@/utils/dateUtils';
+import { Plus, Calendar, TrendingUp, Users, Clock } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { retrospectives, addRetrospective, deleteRetrospective, getRetrospectivesByWeek } = useRetrospectives();
+  const [showForm, setShowForm] = useState(false);
+
+  const today = getTodayString();
+  const currentDayCount = calculateDayCount(today);
+  const currentWeek = calculateWeekNumber(today);
+  const retrospectivesByWeek = getRetrospectivesByWeek();
+  const weekNumbers = Object.keys(retrospectivesByWeek).map(Number).sort((a, b) => b - a);
+
+  const handleFormSubmit = (formData: RetrospectiveFormData) => {
+    const newRetrospective = addRetrospective(formData);
+    setShowForm(false);
+    toast({
+      title: "회고가 저장되었습니다! 🎉",
+      description: `Week ${newRetrospective.week} D+${newRetrospective.day_count}일차 회고가 성공적으로 저장되었습니다.`,
+    });
+  };
+
+  const handleViewRetrospective = (id: string) => {
+    navigate(`/retrospective/${id}`);
+  };
+
+  const handleDeleteRetrospective = (id: string) => {
+    if (window.confirm('정말로 이 회고를 삭제하시겠습니까?')) {
+      deleteRetrospective(id);
+      toast({
+        title: "회고가 삭제되었습니다",
+        description: "선택한 회고가 성공적으로 삭제되었습니다.",
+      });
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background">
+      {/* Hero Section */}
+      <div className="bg-gradient-primary text-primary-foreground">
+        <div className="container mx-auto px-4 py-12">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-4">
+              📝 팀 회고 관리 시스템
+            </h1>
+            <p className="text-xl text-primary-foreground/80 mb-6">
+              주차별로 체계적인 회고를 관리하고 성장의 발자취를 남겨보세요
+            </p>
+            
+            {/* Current Status */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-8">
+              <div className="bg-white/10 rounded-lg p-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Calendar className="h-5 w-5" />
+                  <span className="font-semibold">현재 주차</span>
+                </div>
+                <div className="text-2xl font-bold">Week {currentWeek}</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Clock className="h-5 w-5" />
+                  <span className="font-semibold">진행 일수</span>
+                </div>
+                <div className="text-2xl font-bold">D+{currentDayCount}</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <TrendingUp className="h-5 w-5" />
+                  <span className="font-semibold">총 회고</span>
+                </div>
+                <div className="text-2xl font-bold">{retrospectives.length}개</div>
+              </div>
+            </div>
+
+            <Button 
+              size="lg" 
+              className="bg-white/20 hover:bg-white/30 text-primary-foreground border border-white/30"
+              onClick={() => setShowForm(true)}
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              새 회고 작성
+            </Button>
+          </div>
+        </div>
       </div>
+
+      {/* Content */}
+      <div className="container mx-auto px-4 py-8">
+        {retrospectives.length === 0 ? (
+          <Card className="max-w-2xl mx-auto text-center shadow-soft">
+            <CardContent className="pt-8 pb-8">
+              <div className="text-6xl mb-4">📝</div>
+              <h3 className="text-xl font-semibold mb-2">첫 번째 회고를 작성해보세요!</h3>
+              <p className="text-muted-foreground mb-6">
+                팀의 성장과 발전을 위한 회고를 시작해보세요.
+              </p>
+              <Button onClick={() => setShowForm(true)} className="bg-gradient-primary">
+                <Plus className="h-4 w-4 mr-2" />
+                회고 작성하기
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-8">
+            {weekNumbers.map(weekNumber => (
+              <div key={weekNumber} className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-2xl font-bold">Week {weekNumber} 회고</h2>
+                  <Badge variant="secondary" className="px-3 py-1">
+                    {retrospectivesByWeek[weekNumber].length}개
+                  </Badge>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {retrospectivesByWeek[weekNumber].map(retrospective => (
+                    <RetrospectiveCard
+                      key={retrospective.id}
+                      retrospective={retrospective}
+                      onView={handleViewRetrospective}
+                      onDelete={handleDeleteRetrospective}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Form Modal */}
+      {showForm && (
+        <RetrospectiveForm
+          onSubmit={handleFormSubmit}
+          onCancel={() => setShowForm(false)}
+        />
+      )}
     </div>
   );
 };
