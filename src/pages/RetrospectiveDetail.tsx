@@ -172,6 +172,8 @@ export default function RetrospectiveDetail() {
                   url={window.location.href}
                   title={`[D+${retrospective.day_count} 회고] - ${formattedDate}`}
                   author={retrospective.author}
+                  summary={retrospective.summary}
+                  dayCount={retrospective.day_count}
                 />
               </section>
             </div>

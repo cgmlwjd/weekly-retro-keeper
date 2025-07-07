@@ -15,38 +15,63 @@ interface ShareModalProps {
   url: string;
   title: string;
   author: string;
+  summary: string;
+  dayCount: number;
 }
 
-export default function ShareModal({ url, title, author }: ShareModalProps) {
+export default function ShareModal({ url, title, author, summary, dayCount }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
+  const createShareText = (platform: 'short' | 'long') => {
+    const baseText = `${title} by ${author}`;
+    if (platform === 'short') {
+      const shortSummary = summary.length > 100 ? summary.substring(0, 100) + '...' : summary;
+      return `${baseText}\n\n📝 ${shortSummary}`;
+    } else {
+      return `${baseText}\n\n📝 요약:\n${summary}\n\n🔗 자세히 보기:`;
+    }
+  };
+
   const shareToFacebook = () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title)}`, '_blank');
+    const shareText = createShareText('long');
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(shareText)}`, '_blank');
   };
 
   const shareToTwitter = () => {
-    const text = `${title} by ${author}`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+    const shareText = createShareText('short');
+    const fullText = `${shareText}\n\n${url}`;
+    // Twitter has character limit, so we need to be careful
+    const maxLength = 280;
+    let finalText = fullText;
+    if (finalText.length > maxLength) {
+      const availableLength = maxLength - url.length - 5; // 5 for "\n\n"
+      const truncatedShare = shareText.substring(0, availableLength - 3) + '...';
+      finalText = `${truncatedShare}\n\n${url}`;
+    }
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(finalText)}`, '_blank');
   };
 
   const shareToLinkedIn = () => {
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+    const shareText = createShareText('long');
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(shareText)}`, '_blank');
   };
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(url);
+      const shareText = createShareText('long');
+      const fullShareContent = `${shareText}\n\n${url}`;
+      await navigator.clipboard.writeText(fullShareContent);
       setCopied(true);
       toast({
-        title: "링크가 복사되었습니다",
-        description: "클립보드에 회고 링크가 복사되었습니다.",
+        title: "공유 내용이 복사되었습니다",
+        description: "요약과 링크가 함께 클립보드에 복사되었습니다.",
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       toast({
         title: "복사 실패",
-        description: "링크 복사에 실패했습니다.",
+        description: "공유 내용 복사에 실패했습니다.",
         variant: "destructive",
       });
     }
@@ -63,6 +88,9 @@ export default function ShareModal({ url, title, author }: ShareModalProps) {
       <DrawerContent className="px-4 pb-6">
         <DrawerHeader className="text-center">
           <DrawerTitle>회고 공유하기</DrawerTitle>
+          <div className="text-sm text-muted-foreground mt-2">
+            요약과 링크가 함께 공유됩니다
+          </div>
         </DrawerHeader>
         
         <div className="space-y-4">
@@ -104,7 +132,7 @@ export default function ShareModal({ url, title, author }: ShareModalProps) {
               ) : (
                 <Copy className="h-5 w-5" />
               )}
-              <span>{copied ? '복사됨' : '링크 복사'}</span>
+              <span>{copied ? '복사됨' : '전체 복사'}</span>
             </Button>
           </div>
           
