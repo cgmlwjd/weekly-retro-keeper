@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useRetrospectives } from '@/hooks/useRetrospectives';
 import { formatDate } from '@/utils/dateUtils';
-import { ArrowLeft, Calendar, User, FileText, CheckCircle, AlertCircle, Target, StickyNote, Trash2, Share2, Facebook, Twitter, Linkedin } from 'lucide-react';
+import { ArrowLeft, Calendar, User, FileText, CheckCircle, AlertCircle, Target, StickyNote, Trash2 } from 'lucide-react';
+import ShareModal from '@/components/ShareModal';
 import { useToast } from '@/hooks/use-toast';
 
 export default function RetrospectiveDetail() {
@@ -45,38 +46,6 @@ export default function RetrospectiveDetail() {
     }
   };
 
-  const shareToFacebook = () => {
-    const url = window.location.href;
-    const text = `[D+${retrospective.day_count} 회고] - ${formattedDate}`;
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`, '_blank');
-  };
-
-  const shareToTwitter = () => {
-    const url = window.location.href;
-    const text = `[D+${retrospective.day_count} 회고] - ${formattedDate} by ${retrospective.author}`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-  };
-
-  const shareToLinkedIn = () => {
-    const url = window.location.href;
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
-  };
-
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      toast({
-        title: "링크가 복사되었습니다",
-        description: "클립보드에 회고 링크가 복사되었습니다.",
-      });
-    } catch (err) {
-      toast({
-        title: "복사 실패",
-        description: "링크 복사에 실패했습니다.",
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -199,28 +168,11 @@ export default function RetrospectiveDetail() {
 
               {/* Share Section */}
               <section>
-                <div className="flex items-center gap-2 mb-4">
-                  <Share2 className="h-5 w-5 text-primary" />
-                  <h3 className="text-xl font-semibold">공유하기</h3>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <Button variant="outline" onClick={shareToFacebook} className="gap-2">
-                    <Facebook className="h-4 w-4" />
-                    Facebook
-                  </Button>
-                  <Button variant="outline" onClick={shareToTwitter} className="gap-2">
-                    <Twitter className="h-4 w-4" />
-                    Twitter
-                  </Button>
-                  <Button variant="outline" onClick={shareToLinkedIn} className="gap-2">
-                    <Linkedin className="h-4 w-4" />
-                    LinkedIn
-                  </Button>
-                  <Button variant="outline" onClick={copyToClipboard} className="gap-2">
-                    <Share2 className="h-4 w-4" />
-                    링크 복사
-                  </Button>
-                </div>
+                <ShareModal 
+                  url={window.location.href}
+                  title={`[D+${retrospective.day_count} 회고] - ${formattedDate}`}
+                  author={retrospective.author}
+                />
               </section>
             </div>
           </CardContent>
