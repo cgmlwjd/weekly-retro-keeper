@@ -9,7 +9,7 @@ import {
   DrawerClose,
 } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
-import { Share2, MessageCircle, BookOpen, Instagram, Copy, Check } from 'lucide-react';
+import { Share2, MessageCircle, BookOpen, Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ShareModalProps {
@@ -37,8 +37,18 @@ export default function ShareModal({ url, title, author, summary, dayCount }: Sh
   const shareToKakaoTalk = () => {
     const shareText = createShareText('short');
     const fullText = `${shareText}\n\n${url}`;
-    // KakaoTalk sharing via web
-    window.open(`https://story.kakao.com/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`, '_blank');
+    // KakaoTalk sharing via URL scheme
+    const kakaoUrl = `kakaotalk://share?text=${encodeURIComponent(fullText)}`;
+    window.location.href = kakaoUrl;
+    
+    // Fallback: copy to clipboard if KakaoTalk is not available
+    setTimeout(() => {
+      navigator.clipboard.writeText(fullText);
+      toast({
+        title: "카카오톡 공유 준비 완료",
+        description: "카카오톡이 열리지 않으면 내용이 클립보드에 복사되었습니다.",
+      });
+    }, 1000);
   };
 
   const shareToBlog = () => {
@@ -49,16 +59,6 @@ export default function ShareModal({ url, title, author, summary, dayCount }: Sh
     toast({
       title: "블로그 공유 내용이 복사되었습니다",
       description: "블로그에 붙여넣기 하여 공유해보세요.",
-    });
-  };
-
-  const shareToInstagram = () => {
-    const shareText = createShareText('short');
-    // Instagram doesn't support direct link sharing, so we copy the text
-    navigator.clipboard.writeText(shareText);
-    toast({
-      title: "인스타그램 공유 텍스트가 복사되었습니다",
-      description: "인스타그램 스토리나 게시물에 붙여넣기 하세요. (링크는 별도 추가)",
     });
   };
 
@@ -99,7 +99,7 @@ export default function ShareModal({ url, title, author, summary, dayCount }: Sh
         </DrawerHeader>
         
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <Button 
               variant="outline" 
               onClick={shareToKakaoTalk} 
@@ -116,15 +116,6 @@ export default function ShareModal({ url, title, author, summary, dayCount }: Sh
             >
               <BookOpen className="h-5 w-5 text-green-600" />
               <span>블로그</span>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              onClick={shareToInstagram} 
-              className="gap-2 h-12"
-            >
-              <Instagram className="h-5 w-5 text-pink-500" />
-              <span>인스타그램</span>
             </Button>
             
             <Button 
