@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import {
   Drawer,
@@ -8,7 +9,7 @@ import {
   DrawerClose,
 } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
-import { Share2, Facebook, Twitter, Linkedin, Copy, Check } from 'lucide-react';
+import { Share2, MessageCircle, BookOpen, Instagram, Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ShareModalProps {
@@ -33,28 +34,32 @@ export default function ShareModal({ url, title, author, summary, dayCount }: Sh
     }
   };
 
-  const shareToFacebook = () => {
-    const shareText = createShareText('long');
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(shareText)}`, '_blank');
-  };
-
-  const shareToTwitter = () => {
+  const shareToKakaoTalk = () => {
     const shareText = createShareText('short');
     const fullText = `${shareText}\n\n${url}`;
-    // Twitter has character limit, so we need to be careful
-    const maxLength = 280;
-    let finalText = fullText;
-    if (finalText.length > maxLength) {
-      const availableLength = maxLength - url.length - 5; // 5 for "\n\n"
-      const truncatedShare = shareText.substring(0, availableLength - 3) + '...';
-      finalText = `${truncatedShare}\n\n${url}`;
-    }
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(finalText)}`, '_blank');
+    // KakaoTalk sharing via web
+    window.open(`https://story.kakao.com/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`, '_blank');
   };
 
-  const shareToLinkedIn = () => {
+  const shareToBlog = () => {
     const shareText = createShareText('long');
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(shareText)}`, '_blank');
+    const fullShareContent = `${shareText}\n\n${url}`;
+    // Generic blog sharing - copy content and show instructions
+    navigator.clipboard.writeText(fullShareContent);
+    toast({
+      title: "블로그 공유 내용이 복사되었습니다",
+      description: "블로그에 붙여넣기 하여 공유해보세요.",
+    });
+  };
+
+  const shareToInstagram = () => {
+    const shareText = createShareText('short');
+    // Instagram doesn't support direct link sharing, so we copy the text
+    navigator.clipboard.writeText(shareText);
+    toast({
+      title: "인스타그램 공유 텍스트가 복사되었습니다",
+      description: "인스타그램 스토리나 게시물에 붙여넣기 하세요. (링크는 별도 추가)",
+    });
   };
 
   const copyToClipboard = async () => {
@@ -97,29 +102,29 @@ export default function ShareModal({ url, title, author, summary, dayCount }: Sh
           <div className="grid grid-cols-2 gap-3">
             <Button 
               variant="outline" 
-              onClick={shareToFacebook} 
+              onClick={shareToKakaoTalk} 
               className="gap-2 h-12"
             >
-              <Facebook className="h-5 w-5 text-blue-600" />
-              <span>Facebook</span>
+              <MessageCircle className="h-5 w-5 text-yellow-500" />
+              <span>카카오톡</span>
             </Button>
             
             <Button 
               variant="outline" 
-              onClick={shareToTwitter} 
+              onClick={shareToBlog} 
               className="gap-2 h-12"
             >
-              <Twitter className="h-5 w-5 text-sky-500" />
-              <span>Twitter</span>
+              <BookOpen className="h-5 w-5 text-green-600" />
+              <span>블로그</span>
             </Button>
             
             <Button 
               variant="outline" 
-              onClick={shareToLinkedIn} 
+              onClick={shareToInstagram} 
               className="gap-2 h-12"
             >
-              <Linkedin className="h-5 w-5 text-blue-700" />
-              <span>LinkedIn</span>
+              <Instagram className="h-5 w-5 text-pink-500" />
+              <span>인스타그램</span>
             </Button>
             
             <Button 
