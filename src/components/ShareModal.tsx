@@ -43,7 +43,12 @@ export default function ShareModal({ url, title, author, summary, dayCount }: Sh
     
     // Fallback: copy to clipboard if KakaoTalk is not available
     setTimeout(() => {
-      navigator.clipboard.writeText(fullText);
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(fullText).catch(() => {
+          // Fallback for clipboard write failure
+          console.log('Clipboard write failed, but content is ready for sharing');
+        });
+      }
       toast({
         title: "카카오톡 공유 준비 완료",
         description: "카카오톡이 열리지 않으면 내용이 클립보드에 복사되었습니다.",
@@ -55,7 +60,11 @@ export default function ShareModal({ url, title, author, summary, dayCount }: Sh
     const shareText = createShareText('long');
     const fullShareContent = `${shareText}\n\n${url}`;
     // Generic blog sharing - copy content and show instructions
-    navigator.clipboard.writeText(fullShareContent);
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(fullShareContent).catch(() => {
+        console.log('Clipboard write failed');
+      });
+    }
     toast({
       title: "블로그 공유 내용이 복사되었습니다",
       description: "블로그에 붙여넣기 하여 공유해보세요.",
@@ -66,13 +75,23 @@ export default function ShareModal({ url, title, author, summary, dayCount }: Sh
     try {
       const shareText = createShareText('long');
       const fullShareContent = `${shareText}\n\n${url}`;
-      await navigator.clipboard.writeText(fullShareContent);
-      setCopied(true);
-      toast({
-        title: "공유 내용이 복사되었습니다",
-        description: "요약과 링크가 함께 클립보드에 복사되었습니다.",
-      });
-      setTimeout(() => setCopied(false), 2000);
+      
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(fullShareContent);
+        setCopied(true);
+        toast({
+          title: "공유 내용이 복사되었습니다",
+          description: "요약과 링크가 함께 클립보드에 복사되었습니다.",
+        });
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        // Fallback for unsupported browsers
+        toast({
+          title: "복사 기능을 사용할 수 없습니다",
+          description: "브라우저에서 클립보드 접근이 제한되어 있습니다.",
+          variant: "destructive",
+        });
+      }
     } catch (err) {
       toast({
         title: "복사 실패",
