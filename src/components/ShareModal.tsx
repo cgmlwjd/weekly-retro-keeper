@@ -37,65 +37,91 @@ export default function ShareModal({ url, title, author, summary, dayCount }: Sh
   const shareToKakaoTalk = () => {
     const shareText = createShareText('short');
     const fullText = `${shareText}\n\n${url}`;
+    
     // KakaoTalk sharing via URL scheme
     const kakaoUrl = `kakaotalk://share?text=${encodeURIComponent(fullText)}`;
-    window.location.href = kakaoUrl;
     
-    // Fallback: copy to clipboard if KakaoTalk is not available
-    setTimeout(() => {
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(fullText).catch(() => {
-          // Fallback for clipboard write failure
-          console.log('Clipboard write failed, but content is ready for sharing');
+    try {
+      window.location.href = kakaoUrl;
+      
+      // Fallback: copy to clipboard if KakaoTalk is not available
+      setTimeout(() => {
+        copyToClipboardSafely(fullText);
+        toast({
+          title: "카카오톡 공유 준비 완료",
+          description: "카카오톡이 열리지 않으면 내용이 클립보드에 복사되었습니다.",
         });
-      }
+      }, 1000);
+    } catch (error) {
+      console.error('KakaoTalk sharing failed:', error);
+      copyToClipboardSafely(fullText);
       toast({
-        title: "카카오톡 공유 준비 완료",
-        description: "카카오톡이 열리지 않으면 내용이 클립보드에 복사되었습니다.",
+        title: "내용이 복사되었습니다",
+        description: "카카오톡 공유를 위해 내용이 클립보드에 복사되었습니다.",
       });
-    }, 1000);
+    }
   };
 
   const shareToBlog = () => {
     const shareText = createShareText('long');
     const fullShareContent = `${shareText}\n\n${url}`;
-    // Generic blog sharing - copy content and show instructions
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(fullShareContent).catch(() => {
-        console.log('Clipboard write failed');
-      });
-    }
+    
+    copyToClipboardSafely(fullShareContent);
     toast({
       title: "블로그 공유 내용이 복사되었습니다",
       description: "블로그에 붙여넣기 하여 공유해보세요.",
     });
   };
 
-  const copyToClipboard = async () => {
+  const copyToClipboardSafely = async (text: string) => {
     try {
-      const shareText = createShareText('long');
-      const fullShareContent = `${shareText}\n\n${url}`;
-      
       if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(fullShareContent);
-        setCopied(true);
-        toast({
-          title: "공유 내용이 복사되었습니다",
-          description: "요약과 링크가 함께 클립보드에 복사되었습니다.",
-        });
-        setTimeout(() => setCopied(false), 2000);
+        await navigator.clipboard.writeText(text);
+        return true;
       } else {
-        // Fallback for unsupported browsers
-        toast({
-          title: "복사 기능을 사용할 수 없습니다",
-          description: "브라우저에서 클립보드 접근이 제한되어 있습니다.",
-          variant: "destructive",
-        });
+        // Fallback for older browsers or non-HTTPS contexts
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+          return true;
+        } catch (err) {
+          console.error('Fallback copy failed:', err);
+          return false;
+        } finally {
+          document.body.removeChild(textArea);
+        }
       }
     } catch (err) {
+      console.error('Copy to clipboard failed:', err);
+      return false;
+    }
+  };
+
+  const copyToClipboard = async () => {
+    const shareText = createShareText('long');
+    const fullShareContent = `${shareText}\n\n${url}`;
+    
+    const success = await copyToClipboardSafely(fullShareContent);
+    
+    if (success) {
+      setCopied(true);
+      toast({
+        title: "공유 내용이 복사되었습니다",
+        description: "요약과 링크가 함께 클립보드에 복사되었습니다.",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } else {
       toast({
         title: "복사 실패",
-        description: "공유 내용 복사에 실패했습니다.",
+        description: "공유 내용 복사에 실패했습니다. 다시 시도해주세요.",
         variant: "destructive",
       });
     }
