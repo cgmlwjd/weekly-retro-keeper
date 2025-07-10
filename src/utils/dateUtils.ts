@@ -1,3 +1,4 @@
+
 export const PROJECT_START_DATE = '2025-06-17';
 
 export function calculateDayCount(currentDate: string): number {
@@ -23,10 +24,17 @@ export function calculateWeekNumber(currentDate: string): number {
   const start = new Date(PROJECT_START_DATE);
   const current = new Date(currentDate);
   
-  const timeDiff = current.getTime() - start.getTime();
-  const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+  // 프로젝트 시작일 기준으로 달 계산
+  const startYear = start.getFullYear();
+  const startMonth = start.getMonth(); // 0-based (6월 = 5)
   
-  return Math.ceil((daysDiff + 1) / 7);
+  const currentYear = current.getFullYear();
+  const currentMonth = current.getMonth();
+  
+  // 년도 차이를 고려한 월 계산
+  const monthDiff = (currentYear - startYear) * 12 + (currentMonth - startMonth);
+  
+  return monthDiff + 1; // 1달부터 시작
 }
 
 export function formatDate(date: string): string {
