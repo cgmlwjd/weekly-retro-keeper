@@ -30,7 +30,7 @@ const Index = () => {
       setShowForm(false);
       toast({
         title: "회고가 저장되었습니다! 🎉",
-        description: `Week ${newRetrospective.week} D+${newRetrospective.day_count}일차 회고가 성공적으로 저장되었습니다.`,
+        description: `${newRetrospective.week}달 D+${newRetrospective.day_count}일차 회고가 성공적으로 저장되었습니다.`,
       });
     } catch (error) {
       toast({
@@ -80,7 +80,7 @@ const Index = () => {
               📝 팀 회고 관리 시스템
             </h1>
             <p className="text-xl text-primary-foreground/80 mb-6">
-              주차별로 체계적인 회고를 관리하고 성장의 발자취를 남겨보세요
+              월별로 체계적인 회고를 관리하고 성장의 발자취를 남겨보세요
             </p>
             
             {/* Current Status */}
@@ -88,9 +88,9 @@ const Index = () => {
               <div className="bg-white/10 rounded-lg p-4">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Calendar className="h-5 w-5" />
-                  <span className="font-semibold">현재 주차</span>
+                  <span className="font-semibold">현재 달</span>
                 </div>
-                <div className="text-2xl font-bold">Week {currentWeek}</div>
+                <div className="text-2xl font-bold">{currentWeek}달</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -148,7 +148,7 @@ const Index = () => {
             {weekNumbers.map(weekNumber => (
               <div key={weekNumber} className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-bold">Week {weekNumber} 회고</h2>
+                  <h2 className="text-2xl font-bold">{weekNumber}달 회고</h2>
                   <Badge variant="secondary" className="px-3 py-1">
                     {retrospectivesByWeek[weekNumber].length}개
                   </Badge>

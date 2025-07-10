@@ -44,7 +44,7 @@ export function RetrospectiveForm({ onSubmit, onCancel }: RetrospectiveFormProps
         <CardHeader className="bg-gradient-primary text-primary-foreground">
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Week {weekNumber} 회고 작성
+            {weekNumber}달 회고 작성
           </CardTitle>
           <p className="text-primary-foreground/80">
             D+{dayCount}일차 - {formattedDate}
@@ -80,7 +80,7 @@ export function RetrospectiveForm({ onSubmit, onCancel }: RetrospectiveFormProps
                 요약 (Summary)
               </Label>
               <Textarea
-                placeholder="오늘의 업무를 간단히 요약해주세요..."
+                placeholder="한 달의 업무를 간단히 요약해주세요..."
                 value={formData.summary}
                 onChange={(e) => handleInputChange('summary', e.target.value)}
                 className="min-h-[80px]"
