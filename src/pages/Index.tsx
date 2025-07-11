@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { useRetrospectives } from '@/hooks/useRetrospectives';
 import { RetrospectiveForm } from '@/components/RetrospectiveForm';
 import { RetrospectiveCard } from '@/components/RetrospectiveCard';
 import { RetrospectiveFormData } from '@/types/retrospective';
-import { calculateDayCount, calculateWeekNumber, getTodayString } from '@/utils/dateUtils';
+import { calculateDayCount, calculateWeekNumber, getTodayString, getMonthName } from '@/utils/dateUtils';
 import { Plus, Calendar, TrendingUp, Users, Clock, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -90,7 +89,7 @@ const Index = () => {
                   <Calendar className="h-5 w-5" />
                   <span className="font-semibold">현재 달</span>
                 </div>
-                <div className="text-2xl font-bold">{currentWeek}달</div>
+                <div className="text-2xl font-bold">{getMonthName(currentWeek)}</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -148,7 +147,7 @@ const Index = () => {
             {weekNumbers.map(weekNumber => (
               <div key={weekNumber} className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-bold">{weekNumber}달 회고</h2>
+                  <h2 className="text-2xl font-bold">{getMonthName(weekNumber)} 회고</h2>
                   <Badge variant="secondary" className="px-3 py-1">
                     {retrospectivesByWeek[weekNumber].length}개
                   </Badge>

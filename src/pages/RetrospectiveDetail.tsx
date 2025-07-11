@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useRetrospectives } from '@/hooks/useRetrospectives';
-import { formatDate } from '@/utils/dateUtils';
+import { formatDate, getMonthName } from '@/utils/dateUtils';
 import { ArrowLeft, Calendar, User, FileText, CheckCircle, AlertCircle, Target, StickyNote, Trash2, Edit, MessageSquare, Save, X } from 'lucide-react';
 import ShareModal from '@/components/ShareModal';
 import { useToast } from '@/hooks/use-toast';
@@ -188,7 +187,7 @@ export default function RetrospectiveDetail() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    <span>{retrospective.week}달</span>
+                    <span>{getMonthName(retrospective.week)}</span>
                   </div>
                 </div>
               </div>

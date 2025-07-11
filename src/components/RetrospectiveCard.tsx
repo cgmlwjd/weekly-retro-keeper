@@ -1,9 +1,8 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Retrospective } from '@/types/retrospective';
-import { formatDate } from '@/utils/dateUtils';
+import { formatDate, getMonthName } from '@/utils/dateUtils';
 import { Calendar, User, Trash2, Eye } from 'lucide-react';
 
 interface RetrospectiveCardProps {
@@ -33,7 +32,7 @@ export function RetrospectiveCard({ retrospective, onView, onDelete }: Retrospec
           </div>
           <Badge variant="secondary" className="shrink-0">
             <Calendar className="h-3 w-3 mr-1" />
-            {retrospective.week}달
+            {getMonthName(retrospective.week)}
           </Badge>
         </div>
       </CardHeader>
