@@ -60,6 +60,28 @@ export function useRetrospectives() {
     },
   });
 
+  // Update retrospective mutation
+  const updateRetrospectiveMutation = useMutation({
+    mutationFn: async ({ id, updateData }: { id: string; updateData: Partial<RetrospectiveFormData & { feedback: string }> }) => {
+      const { data, error } = await supabase
+        .from('retrospectives')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating retrospective:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['retrospectives'] });
+    },
+  });
+
   // Delete retrospective mutation
   const deleteRetrospectiveMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -80,6 +102,10 @@ export function useRetrospectives() {
 
   const addRetrospective = (formData: RetrospectiveFormData) => {
     return addRetrospectiveMutation.mutateAsync(formData);
+  };
+
+  const updateRetrospective = (id: string, updateData: Partial<RetrospectiveFormData & { feedback: string }>) => {
+    return updateRetrospectiveMutation.mutateAsync({ id, updateData });
   };
 
   const deleteRetrospective = (id: string) => {
@@ -115,6 +141,7 @@ export function useRetrospectives() {
     isLoading,
     error,
     addRetrospective,
+    updateRetrospective,
     deleteRetrospective,
     getRetrospectivesByWeek,
     getRetrospectiveById,

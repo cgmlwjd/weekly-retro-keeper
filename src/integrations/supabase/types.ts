@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           date: string
           day_count: number
+          feedback: string | null
           id: string
           keep: string
           memo: string | null
@@ -34,6 +35,7 @@ export type Database = {
           created_at?: string
           date: string
           day_count: number
+          feedback?: string | null
           id?: string
           keep: string
           memo?: string | null
@@ -48,6 +50,7 @@ export type Database = {
           created_at?: string
           date?: string
           day_count?: number
+          feedback?: string | null
           id?: string
           keep?: string
           memo?: string | null
