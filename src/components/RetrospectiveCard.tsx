@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +14,9 @@ interface RetrospectiveCardProps {
 
 export function RetrospectiveCard({ retrospective, onView, onDelete }: RetrospectiveCardProps) {
   const formattedDate = formatDate(retrospective.date);
+  
+  // 상대방 이름 계산
+  const partnerName = retrospective.author === '최희정' ? '김창훈' : '최희정';
 
   return (
     <Card className="bg-gradient-card hover:shadow-medium transition-all duration-300 hover:-translate-y-1 cursor-pointer group">
@@ -24,12 +28,12 @@ export function RetrospectiveCard({ retrospective, onView, onDelete }: Retrospec
             </CardTitle>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <User className="h-4 w-4" />
-              <span>by {retrospective.author}</span>
+              <span>by {retrospective.author} with {partnerName}</span>
             </div>
           </div>
           <Badge variant="secondary" className="shrink-0">
             <Calendar className="h-3 w-3 mr-1" />
-            Week {retrospective.week}
+            {retrospective.week}달
           </Badge>
         </div>
       </CardHeader>
@@ -56,7 +60,7 @@ export function RetrospectiveCard({ retrospective, onView, onDelete }: Retrospec
             <div className="p-2 bg-warning/10 rounded-md">
               <div className="font-medium text-warning mb-1">Try</div>
               <div className="line-clamp-2 text-muted-foreground">
-                {retrospective.try.slice(0, 50)}...
+                {retrospectives.try.slice(0, 50)}...
               </div>
             </div>
           </div>

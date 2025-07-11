@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,6 +48,7 @@ export default function RetrospectiveDetail() {
   }
 
   const formattedDate = formatDate(retrospective.date);
+  const partnerName = retrospective.author === '최희정' ? '김창훈' : '최희정';
 
   const handleDelete = () => {
     if (window.confirm('정말로 이 회고를 삭제하시겠습니까?')) {
@@ -182,7 +184,7 @@ export default function RetrospectiveDetail() {
                 <div className="flex items-center gap-4 text-primary-foreground/80">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    <span>by {retrospective.author}</span>
+                    <span>by {retrospective.author} with {partnerName}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
