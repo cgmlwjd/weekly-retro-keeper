@@ -23,7 +23,7 @@ export function RetrospectiveCard({ retrospective, onView, onDelete }: Retrospec
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <CardTitle className="text-lg font-semibold">
-              [D+{retrospective.day_count} 회고] - {formattedDate}
+              {getMonthName(retrospective.week)} 회고 - {formattedDate}
             </CardTitle>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <User className="h-4 w-4" />
@@ -32,7 +32,7 @@ export function RetrospectiveCard({ retrospective, onView, onDelete }: Retrospec
           </div>
           <Badge variant="secondary" className="shrink-0">
             <Calendar className="h-3 w-3 mr-1" />
-            {getMonthName(retrospective.week)}
+            D+{retrospective.day_count}
           </Badge>
         </div>
       </CardHeader>

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RetrospectiveFormData, Author } from '@/types/retrospective';
-import { calculateDayCount, calculateWeekNumber, getTodayString, formatDate } from '@/utils/dateUtils';
+import { calculateDayCount, calculateWeekNumber, getTodayString, formatDate, getMonthName } from '@/utils/dateUtils';
 import { Calendar, User, FileText, CheckCircle, AlertCircle, Target, StickyNote } from 'lucide-react';
 
 interface RetrospectiveFormProps {
@@ -44,7 +44,7 @@ export function RetrospectiveForm({ onSubmit, onCancel }: RetrospectiveFormProps
         <CardHeader className="bg-gradient-primary text-primary-foreground">
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            {weekNumber}달 회고 작성
+            {getMonthName(weekNumber)} 회고 작성
           </CardTitle>
           <p className="text-primary-foreground/80">
             D+{dayCount}일차 - {formattedDate}

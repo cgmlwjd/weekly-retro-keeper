@@ -178,7 +178,7 @@ export default function RetrospectiveDetail() {
             <div className="flex items-start justify-between">
               <div>
                 <CardTitle className="text-2xl mb-2">
-                  [D+{retrospective.day_count} 회고] - {formattedDate}
+                  {getMonthName(retrospective.week)} 회고 - {formattedDate}
                 </CardTitle>
                 <div className="flex items-center gap-4 text-primary-foreground/80">
                   <div className="flex items-center gap-2">
@@ -187,7 +187,7 @@ export default function RetrospectiveDetail() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    <span>{getMonthName(retrospective.week)}</span>
+                    <span>D+{retrospective.day_count}</span>
                   </div>
                 </div>
               </div>
