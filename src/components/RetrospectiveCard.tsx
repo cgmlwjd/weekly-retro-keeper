@@ -60,7 +60,7 @@ export function RetrospectiveCard({ retrospective, onView, onDelete }: Retrospec
             <div className="p-2 bg-warning/10 rounded-md">
               <div className="font-medium text-warning mb-1">Try</div>
               <div className="line-clamp-2 text-muted-foreground">
-                {retrospectives.try.slice(0, 50)}...
+                {retrospective.try.slice(0, 50)}...
               </div>
             </div>
           </div>
